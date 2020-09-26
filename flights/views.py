@@ -2,7 +2,8 @@ from rest_framework.generics import ListAPIView, RetrieveAPIView, RetrieveUpdate
 from datetime import datetime
 from rest_framework.permissions import IsAuthenticated
 from .models import Flight, Booking
-from .serializers import FlightSerializer, BookingSerializer, BookingDetailsSerializer, UpdateBookingSerializer, RegisterSerializer, AdminUpdateBookingSerializer
+from .serializers import FlightSerializer, BookingSerializer, BookingDetailsSerializer, UpdateBookingSerializer, RegisterSerializer, CreateBookingSerializer, AdminUpdateBookingSerializer
+from .permissions import IsOwner
 
 
 class FlightsList(ListAPIView):
@@ -16,7 +17,7 @@ class BookingsList(ListAPIView):
 	permission_classes = [IsAuthenticated]
 
 	def get_queryset(self):
-		return Booking.objects.filter(user=self.request.user,date__gte=datetime.today())
+		return Booking.objects.filter(date__gte=datetime.today(),user=self.request.user)
 
 
 class BookingDetails(RetrieveAPIView):
@@ -46,7 +47,7 @@ class CancelBooking(DestroyAPIView):
 
 
 class BookFlight(CreateAPIView):
-	serializer_class = UpdateBookingSerializer
+	serializer_class = CreateBookingSerializer
 
 	def perform_create(self, serializer):
 		serializer.save(user=self.request.user, flight_id=self.kwargs['flight_id'])
